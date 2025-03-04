@@ -4,6 +4,95 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        
+        <!-- 流程节点 -->
+        <mxCell id="start" value="开始" style="ellipse;whiteSpace=wrap;html=1;fillColor=#96FF96;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="80" height="40" />
+        </mxCell>
+
+        <mxCell id="step1" value="1. 获取当前时间\n（分钟级）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E3F2FD;" vertex="1" parent="1">
+          <mxGeometry x="370" y="100" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step2" value="2. 计算时间范围\n当前时间-10分钟" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E3F2FD;" vertex="1" parent="1">
+          <mxGeometry x="370" y="200" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step3" value="3. 查询历史数据\nGIB_SIGN_RQMT_HIS表\n时间范围 [T-10m, T]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE0B2;" vertex="1" parent="1">
+          <mxGeometry x="370" y="300" width="140" height="80" />
+        </mxCell>
+
+        <mxCell id="step4" value="4. 按客户+账户分组" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E3F2FD;" vertex="1" parent="1">
+          <mxGeometry x="370" y="420" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step5" value="5. 与白名单客户取交集" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFCDD2;" vertex="1" parent="1">
+          <mxGeometry x="370" y="520" width="140" height="80" />
+        </mxCell>
+
+        <mxCell id="step6" value="6. 读取最新数据\nGIB_SIGN_RQMT表" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE0B2;" vertex="1" parent="1">
+          <mxGeometry x="370" y="640" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step7" value="7. 构建Mongo文档\n包含删除标识" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#C8E6C9;" vertex="1" parent="1">
+          <mxGeometry x="370" y="740" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step8" value="8. 检查数据是否存在\n于GIB_SIGN_RQMT?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFCDD2;" vertex="1" parent="1">
+          <mxGeometry x="370" y="840" width="140" height="80" />
+        </mxCell>
+
+        <mxCell id="step9" value="9. 执行Mongo写入\n（覆盖更新）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#C8E6C9;" vertex="1" parent="1">
+          <mxGeometry x="200" y="960" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step10" value="10. 执行软删除\n（设置删除标记）" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#C8E6C9;" vertex="1" parent="1">
+          <mxGeometry x="540" y="960" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step11" value="11. 重试机制\n最大3次尝试" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF9C4;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1060" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step12" value="12. 记录失败任务\n发送告警通知" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFCCBC;" vertex="1" parent="1">
+          <mxGeometry x="200" y="1160" width="140" height="60" />
+        </mxCell>
+
+        <mxCell id="step13" value="13. 任务完成\n等待下一周期" style="ellipse;whiteSpace=wrap;html=1;fillColor=#96FF96;" vertex="1" parent="1">
+          <mxGeometry x="370" y="1260" width="140" height="60" />
+        </mxCell>
+
+        <!-- 连接线 -->
+        <mxCell id="conn1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="start" target="step1">
+          <mxGeometry relative="1" />
+        </mxCell>
+
+        <mxCell id="conn2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step1" target="step2" />
+        
+        <!-- 省略部分连接线定义... -->
+
+        <!-- 条件分支连接 -->
+        <mxCell id="cond1" value="有交集" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step5" target="step6">
+          <mxGeometry relative="1">
+            <mxPoint x="440" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="cond2" value="无交集" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step5" target="step13">
+          <mxGeometry relative="1">
+            <mxPoint x="440" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 错误处理连接 -->
+        <mxCell id="err1" value="写入失败" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step9" target="step11" />
+
+        <mxCell id="loop1" value="重试次数&lt;3?" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step11" target="step9">
+          <mxGeometry relative="1">
+            <mxPoint x="270" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
       </root>
     </mxGraphModel>
   </diagram>
